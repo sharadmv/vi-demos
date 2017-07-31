@@ -61,7 +61,7 @@ p_pi = Dirichlet(T.constant(10.0 * np.ones([K], dtype=T.floatx())))
 p_theta = NIW(map(lambda x: T.constant(np.array(x).astype(T.floatx())), [np.eye(D) * sigma, np.zeros(D), 1, D + 1]))
 prior = (p_pi, p_theta)
 
-np.random.seed(2)
+np.random.seed(None)
 
 q_pi = make_variable(Dirichlet(np.ones([K], dtype=T.floatx())))
 q_theta = make_variable(NIW(map(lambda x: np.array(x).astype(T.floatx()), [np.tile(np.eye(D)[None] * 100, [K, 1, 1]), np.random.multivariate_normal(mean=np.zeros([D]), cov=np.eye(D) * 20, size=[K]), np.ones(K), np.ones(K) * (D + 1)])))
