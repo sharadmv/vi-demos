@@ -17,6 +17,7 @@ def generate_data(N, D, K, sigma0=10, sigma=10, seed=None):
     return X.astype(np.float32)
 
 fig, ax = plt.subplots()
+fig2, ax2 = plt.subplots()
 plt.ion()
 plt.show()
 
@@ -25,8 +26,9 @@ def make_variable(dist):
 
 def draw():
     mean, cov, a = sess.run([mu, sigma, alpha])
-    print(a)
     ax.cla()
+    ax2.cla()
+    ax2.plot(elbos)
     ax.scatter(*X.T, s=1)
     for k in range(K):
         plot_ellipse(a[k], mean[k], cov[k])
@@ -37,6 +39,7 @@ def iter():
     sess.run([z_update])
     sess.run([pi_update])
     sess.run([theta_update])
+    elbos.append(sess.run(elbo))
     draw()
 
 
@@ -81,14 +84,26 @@ x_tmessage = NIW.pack([
 theta_cmessage = q_theta.expected_sufficient_statistics()
 
 new_pi = p_pi.get_parameters('natural') + T.sum(z_pmessage, 0)
+parent_pi = p_pi.get_parameters('natural')
 pi_update = T.assign(q_pi.get_parameters('natural'), new_pi)
+l_pi = T.sum(new_pi * parent_pi) + Dirichlet(parent_pi, parameter_type='natural').log_z() \
+                                 - Dirichlet(new_pi, parameter_type='natural').log_z()
 
-new_theta = T.einsum('ia,ibc->abc', z_pmessage, x_tmessage) + p_theta.get_parameters('natural')
+new_theta = T.einsum('ia,ibc->abc', z_pmessage, x_tmessage) + p_theta.get_parameters('natural')[None]
+parent_theta = p_theta.get_parameters('natural')
 theta_update = T.assign(q_theta.get_parameters('natural'), new_theta)
+l_theta = T.sum(new_theta * parent_theta) + T.sum(K * NIW(parent_theta, parameter_type='natural').log_z()
+                                 - NIW(new_theta, parameter_type='natural').log_z())
 
+parent_z = q_pi.expected_sufficient_statistics()[None]
 new_z = T.einsum('iab,jab->ij', x_tmessage, theta_cmessage) + q_pi.expected_sufficient_statistics()[None]
 new_z = new_z - T.logsumexp(new_z, -1)[..., None]
 z_update = T.assign(q_z.get_parameters('natural'), new_z)
+l_z = T.sum(new_z * parent_z) + T.sum(N * Categorical(parent_z, parameter_type='natural').log_z()
+                                 - Categorical(new_z, parameter_type='natural').log_z())
+
+elbo = l_theta + l_pi + l_z
+elbos = []
 
 sess = T.interactive_session()
 
