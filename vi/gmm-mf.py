@@ -114,9 +114,6 @@ elbos = []
 sess = T.interactive_session()
 
 draw()
-e = sess.run(elbo)
-print(e)
-print(sess.run([l_pi, l_theta, l_z, l_x]))
 for i in range(100):
     input()
     iter()
