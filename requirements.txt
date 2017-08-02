@@ -1,7 +1,7 @@
 bleach==2.0.0
 cycler==0.10.0
 decorator==4.1.2
--e git+git@github.com:sharadmv/deepx.git@8d0e8732a9da41f8a1c59e34f0369e118bdd902c#egg=deepx
+-e git+git@github.com:sharadmv/deepx.git@9bbd95b1dbc87a651ff5e20f6d86b2152ef4d0dc#egg=deepx
 entrypoints==0.2.3
 html5lib==0.999999999
 ipykernel==4.6.1
