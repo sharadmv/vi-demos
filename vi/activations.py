@@ -4,7 +4,7 @@ from deepx import stats
 
 __all__ = ['Gaussian', 'Bernoulli']
 
-log1pexp = lambda x: T.log(1. + T.exp(x) + T.epsilon())
+log1pexp = lambda x: T.log(1. + T.exp(x) + 1e-4)
 
 class Gaussian(Linear):
 
@@ -17,6 +17,7 @@ class Gaussian(Linear):
         return [self.dim_out[0] * 2]
 
     def activate(self, X):
+        import tensorflow as tf
         if self.cov_type == 'diagonal':
             sigma, mu = T.split(X, 2, axis=-1)
             sigma = T.matrix_diag(log1pexp(sigma))

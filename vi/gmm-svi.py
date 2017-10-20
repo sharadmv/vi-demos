@@ -37,7 +37,7 @@ def draw():
     plt.pause(0.01)
     plt.draw()
 
-def iter(batch_size=20):
+def iter(batch_size=6):
     batch_idx = np.random.permutation(N)[:batch_size]
     sess.run(grad_op, {X:data[batch_idx]})
     e = sess.run(elbo, {X:data})
